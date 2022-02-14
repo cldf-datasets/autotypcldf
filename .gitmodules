@@ -1,0 +1,3 @@
+[submodule "raw/autotyp-data"]
+	path = raw/autotyp-data
+	url = https://github.com/autotyp/autotyp-data
