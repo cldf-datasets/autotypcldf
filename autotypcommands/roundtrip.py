@@ -12,7 +12,15 @@ from cldfbench_autotypcldf import Dataset
 
 
 def register(parser):
-    parser.add_argument('dataset')
+    parser.add_argument('--dataset', default=None)
+
+
+def remove_none(vv):
+    if isinstance(vv, list):
+        return [remove_none(vvv) for vvv in vv]
+    if isinstance(vv, dict):
+        return {k: remove_none(v) for k, v in vv.items() if v is not None}
+    return vv
 
 
 def make_obj(lid, vals, dt, multivalued, vnames, lang):
@@ -20,30 +28,40 @@ def make_obj(lid, vals, dt, multivalued, vnames, lang):
     for vid, values in itertools.groupby(vals, lambda v: v['Parameter_ID']):
         values = [v['Value'] for v in values]
         if multivalued[vid]:
-            res[vnames[vid]] = [dt[vid].parse(v) for v in values]
+            res[vnames[vid]] = remove_none([dt[vid].parse(v) for v in values])
         else:
             assert len(values) == 1, '{}:{}: {}'.format(vnames[vid], lid, values)
             try:
                 res[vnames[vid]] = dt[vid].parse(values[0])
             except:
-                print(values[0], type(values[0]), dt[vid], vnames[vid])
+                print(vnames[vid], lid, values[0])
                 raise
     return res
 
 
 def normalize_json_obj(obj):
-    res = {k: str(v) if k == 'LID' else v for k, v in obj.items() if v is not None}
+    res = {k: str(v) if k == 'LID' else remove_none(v) for k, v in obj.items() if v is not None}
+    if res.get('Glottocode') == 'NA':
+        res['Glottocode'] = None
     if set(res.keys()) != {'LID', 'Language', 'Glottocode'}:
         return res
 
 
 def run(args):
     ds = Dataset()
-    for jsonpath in walk(ds.raw_dir / 'autotyp-data' / 'data' / 'json'):
-        if jsonpath.stem == args.dataset:
-            break
-    else:
-        raise ValueError(args.dataset)
+    for jsonpath in sorted(
+            walk(ds.raw_dir / 'autotyp-data' / 'data' / 'json', mode='files'),
+            key=lambda p: p.stem):
+        if jsonpath.stem == args.dataset or args.dataset is None:
+            roundtrip(ds, args, jsonpath)
+
+
+def comp_ignore_empty_list(obj1, obj2):
+    return {k: v for k, v in obj1.items() if v != []} == {k: v for k, v in obj2.items() if v != []}
+
+
+def roundtrip(ds, args, jsonpath):
+    ds = Dataset()
     jsondata = collections.defaultdict(list)
     for d in jsonlib.load(jsonpath):
         d = normalize_json_obj(d)
@@ -53,7 +71,7 @@ def run(args):
 
     cldf = ds.cldf_reader()
     # collect all variables for the dataset:
-    variables = [p for p in cldf['ParameterTable'] if p['dataset'] == args.dataset]
+    variables = [p for p in cldf['ParameterTable'] if p['dataset'] == jsonpath.stem]
     langs = {l['ID']: l for l in cldf['LanguageTable']}
     vids = set(p['ID'] for p in variables)
     datatypes = {v['ID']: Datatype.fromvalue(v['typespec']) for v in variables}
@@ -93,8 +111,13 @@ def run(args):
         else:
             jd = jsondata.pop(lid)
             obj = make_obj(lid, vals, datatypes, multivalued, vnames, langs[lid])
-            assert obj == jd[0], '{} --- {}'.format(obj, jd[0])
+            assert comp_ignore_empty_list(obj, jd[0]), '{} --- {}'.format(obj, jd[0])
             roundtripped += 1
-    print('records for {} of {} LIDs roundtripped, missed {}'.format(roundtripped, jdl, jsondata.keys()))
+    print('records for {} of {} LIDs roundtripped, missed {}'.format(roundtripped, jdl, list(jsondata.keys())[:5]))
     if not jsondata:
-        args.log.info('OK')
+        args.log.info('{}:OK'.format(jsonpath.stem))
+    else:
+        args.log.warning('{}:FAIL'.format(jsonpath.stem))
+
+{'LID': '10', 'Language': 'Acoma', 'Glottocode': 'west2632', 'Case': [{'HasCase': True, 'IsCaseCodedForDefaultPredicates': True, 'IsCaseCodedForDitransitivePredicates': False, 'IsCaseCodedForOtherPredicates': False}], 'Agreement': [{'HasAgreement': True, 'IsAgreementCodedForDefaultPredicates': True, 'IsAgreementCodedForDitransitivePredicates': False, 'IsAgreementCodedForOtherPredicates': False, 'IsAgreementMarkersCodedForDefaultPredicates': False}]}
+{'LID': '10', 'Glottocode': 'west2632', 'Language': 'Acoma', 'Case': [{'HasCase': True, 'IsCaseCodedForDefaultPredicates': True, 'IsCaseCodedForDitransitivePredicates': False, 'IsCaseCodedForOtherPredicates': False}], 'Agreement': [{'HasAgreement': True, 'IsAgreementCodedForDefaultPredicates': True, 'IsAgreementCodedForDitransitivePredicates': False, 'IsAgreementCodedForOtherPredicates': False, 'IsAgreementMarkersCodedForDefaultPredicates': False}], 'PersonNumberCategories': []}

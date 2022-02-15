@@ -64,6 +64,29 @@ class Parameter:
             self.md.update(self.dataset[1])
         else:
             self.md.update(self.dataset[1]['fields'][self.name])
+        if self.name in [
+            'CaseMarkerExpressesMultipleCategories',
+            'TenseMarkerExpressesMultipleCategories',
+            'NegationMarkerExpressesMultipleCategories',
+            'NounPluralMarkerExpressesMultipleCategories',
+            'HasAnyPrefixes',
+            'HasAnySuffixes',
+            'HasAnyInfixes',
+            'HasAnyProclitics',
+            'HasAnyEnclitics',
+            'HasAnyEndoclitics',
+            'HasAnyPreposedFormatives',
+            'HasAnyPostposedFormatives',
+            'HasAnyInterposedFormatives',
+            'NPHasGovernment',
+            'NPHasAdjGovernment',
+            '',
+            '',
+            '',
+        ]:
+            self.md['data'] = 'logical'
+        if re.match('MarkerPosition(.*?)For[A-Z]', self.name):
+            self.md['data'] = 'value-list'
         self.data = data_path(self.dataset[0])
         #
         # FIXME: adapt description for datatype == 'table'
@@ -143,13 +166,13 @@ class Parameter:
                         if self.datatype == 'table':
                             nv = {}
                             for kkk, vvv in vv.items():
-                                if vvv:
+                                if vvv is not None:
                                     if 'values' in self.md['fields'][kkk]:
                                         if vvv not in self.md['fields'][kkk]['values']:
                                             # FIXME: do something here!
                                             pass
                                     nv[kkk] = vvv
-                            values_and_codes.append((json.dumps(nv), None))
+                            values_and_codes.append((nv, None))
                         elif self.datatype == 'list-of<integer>':
                             values_and_codes.append((vv, None))
                         elif self.datatype == 'list-of<value-list>':
@@ -165,7 +188,7 @@ class Parameter:
                     Language_ID=lid,
                     Parameter_ID=self.id,
                     Value=self.dt.formatted(value),
-                    Code_ID=self.code_map.get(value) if not self.unitset else None,
+                    Code_ID=self.code_map.get(value) if not (self.unitset or isinstance(value, dict)) else None,
                 ), code
 
 
@@ -215,6 +238,7 @@ def fix_bib(s):
     for k, v in repls.items():
         s = s.replace(k, v)
     return s
+
 
 class Dataset(BaseDataset):
     dir = pathlib.Path(__file__).parent
