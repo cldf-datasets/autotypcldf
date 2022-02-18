@@ -1,5 +1,7 @@
 # [](ContributionTable?__template__=property.md#cldf:VerbAgreementAggregatedByMarkerPositionBinned5)
 
+[](ContributionTable?__template__=property.md&property=Description#cldf:VerbAgreementAggregatedByMarkerPositionBinned5)
+
 ## [](ParameterTable#cldf:1069)
 
 ![](MarkerPositionBinned5ForADefault.jpg?parameters=1069&pacific-centered&padding-left=10&padding-right=10&padding-top=20&padding-bottom=20&width=12&height=8&markersize=15#cldfviz.map)

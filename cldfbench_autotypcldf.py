@@ -64,29 +64,6 @@ class Parameter:
             self.md.update(self.dataset[1])
         else:
             self.md.update(self.dataset[1]['fields'][self.name])
-        if self.name in [
-            'CaseMarkerExpressesMultipleCategories',
-            'TenseMarkerExpressesMultipleCategories',
-            'NegationMarkerExpressesMultipleCategories',
-            'NounPluralMarkerExpressesMultipleCategories',
-            'HasAnyPrefixes',
-            'HasAnySuffixes',
-            'HasAnyInfixes',
-            'HasAnyProclitics',
-            'HasAnyEnclitics',
-            'HasAnyEndoclitics',
-            'HasAnyPreposedFormatives',
-            'HasAnyPostposedFormatives',
-            'HasAnyInterposedFormatives',
-            'NPHasGovernment',
-            'NPHasAdjGovernment',
-            '',
-            '',
-            '',
-        ]:
-            self.md['data'] = 'logical'
-        if re.match('MarkerPosition(.*?)For[A-Z]', self.name):
-            self.md['data'] = 'value-list'
         self.data = data_path(self.dataset[0])
         #
         # FIXME: adapt description for datatype == 'table'
@@ -116,11 +93,8 @@ class Parameter:
     def iter_codes(self):
         if not self.unitset:
             if self.datatype in ['value-list', 'list-of<value-list>']:
-                if 'values' not in self.md:
-                    print('no values:', self.name)
-                else:
-                    for code, desc in self.md['values'].items():
-                        yield self.check_code(code, desc=desc, warn=False)
+                for code, desc in self.md['values'].items():
+                    yield self.check_code(code, desc=desc)
 
     def _iter_values(self):
         objs = {}
@@ -141,24 +115,22 @@ class Parameter:
                         k: v for k, v in obj.items()
                         if k not in ['LID', 'Language', 'Glottocode'] and v != None}
 
-    def check_code(self, value, desc=None, warn=True):
-        if value not in self.code_map:
-            if warn:
-                print('adding value', self.name, value)
-            cid = self.counts.inc('cid')
-            self.code_map[value] = str(cid)
-            return dict(
-                ID=str(cid),
-                Name=value,
-                Description=desc,
-                Parameter_ID=str(self.id),
-            )
+    def check_code(self, value, desc=None):
+        assert value not in self.code_map
+        cid = self.counts.inc('cid')
+        self.code_map[value] = str(cid)
+        return dict(
+            ID=str(cid),
+            Name=value,
+            Description=desc,
+            Parameter_ID=str(self.id),
+        )
 
     def iter_values(self):
         for lid, v in self._iter_values():
-            values_and_codes = []
+            values = []
             if self.unitset:
-                values_and_codes.append((v, None))
+                values.append(v)
             else:
                 if self.multivalued:
                     assert isinstance(v, list)
@@ -172,24 +144,22 @@ class Parameter:
                                             # FIXME: do something here!
                                             pass
                                     nv[kkk] = vvv
-                            values_and_codes.append((nv, None))
+                            values.append(nv)
                         elif self.datatype == 'list-of<integer>':
-                            values_and_codes.append((vv, None))
+                            values.append(vv)
                         elif self.datatype == 'list-of<value-list>':
-                            values_and_codes.append((vv, self.check_code(vv)))
-                elif self.datatype == 'value-list':
-                    values_and_codes.append((v, self.check_code(v)))
+                            values.append(vv)
                 else:
-                    values_and_codes.append((v, None))
+                    values.append(v)
 
-            for value, code in values_and_codes:
+            for value in values:
                 yield dict(
                     ID=str(self.counts.inc('vid')),
                     Language_ID=lid,
                     Parameter_ID=self.id,
                     Value=self.dt.formatted(value),
                     Code_ID=self.code_map.get(value) if not (self.unitset or isinstance(value, dict)) else None,
-                ), code
+                )
 
 
 def iter_cols(md, fmap=None):
@@ -364,10 +334,9 @@ composite JSON value.
                 multivalued=p.multivalued,
                 unitset=p.unitset,
             ))
+            #print(p.name, p.data)
             for code in p.iter_codes():
                 args.writer.objects['CodeTable'].append(code)
 
-            for val, code in p.iter_values():
-                if code:
-                    args.writer.objects['CodeTable'].append(code)
+            for val in p.iter_values():
                 args.writer.objects['ValueTable'].append(val)

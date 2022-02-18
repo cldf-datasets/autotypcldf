@@ -1,5 +1,7 @@
 # [](ContributionTable?__template__=property.md#cldf:AlignmentForDefaultPredicatesPerLanguage)
 
+[](ContributionTable?__template__=property.md&property=Description#cldf:AlignmentForDefaultPredicatesPerLanguage)
+
 ## [](ParameterTable#cldf:107)
 
 ![](AccDegreeForAgreement.jpg?parameters=107&pacific-centered&padding-left=10&padding-right=10&padding-top=20&padding-bottom=20&width=12&height=8&markersize=15#cldfviz.map)

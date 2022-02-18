@@ -1,5 +1,7 @@
 # [](ContributionTable?__template__=property.md#cldf:VerbAgreementAggregatedByMarkerHasPreposedExponent)
 
+[](ContributionTable?__template__=property.md&property=Description#cldf:VerbAgreementAggregatedByMarkerHasPreposedExponent)
+
 ## [](ParameterTable#cldf:1086)
 
 ![](MarkerHasPreposedExponentForADefault.jpg?parameters=1086&pacific-centered&padding-left=10&padding-right=10&padding-top=20&padding-bottom=20&width=12&height=8&markersize=15#cldfviz.map)

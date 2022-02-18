@@ -1,5 +1,7 @@
 # [](ContributionTable?__template__=property.md#cldf:VerbInflectionCategoriesAggregatedByMarkerPositionBinned5)
 
+[](ContributionTable?__template__=property.md&property=Description#cldf:VerbInflectionCategoriesAggregatedByMarkerPositionBinned5)
+
 ## [](ParameterTable#cldf:717)
 
 ![](MarkerPositionBinned5ForTAM.jpg?parameters=717&pacific-centered&padding-left=10&padding-right=10&padding-top=20&padding-bottom=20&width=12&height=8&markersize=15#cldfviz.map)

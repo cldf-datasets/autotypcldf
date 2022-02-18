@@ -1,5 +1,7 @@
 # [](ContributionTable?__template__=property.md#cldf:VerbAgreementAggregatedByMarkerHasMultipleExponents)
 
+[](ContributionTable?__template__=property.md&property=Description#cldf:VerbAgreementAggregatedByMarkerHasMultipleExponents)
+
 ## [](ParameterTable#cldf:1120)
 
 ![](MarkerHasMultipleExponentsForADefault.jpg?parameters=1120&pacific-centered&padding-left=10&padding-right=10&padding-top=20&padding-bottom=20&width=12&height=8&markersize=15#cldfviz.map)

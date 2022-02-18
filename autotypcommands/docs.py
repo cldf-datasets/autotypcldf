@@ -26,14 +26,14 @@ def run(args):
     ds = Dataset()
     cldf = ds.cldf_reader()
 
-    contribs = {r['ID'] for r in cldf['ContributionTable']}
-
     for dataset, params in itertools.groupby(
         sorted(cldf['ParameterTable'], key=lambda r: r['dataset']),
         lambda r: r['dataset'],
     ):
         params = list(params)
         if params[0]['unitset']:
+            continue
+        if dataset == 'Alienability':
             continue
         args.log.info('{} ...'.format(dataset))
         md = ['# [](ContributionTable?__template__=property.md#cldf:{})'.format(dataset)]
@@ -54,4 +54,3 @@ def run(args):
             str(ds.cldf_dir / 'StructureDataset-metadata.json'),
         ])
         args.log.info('... done')
-        break

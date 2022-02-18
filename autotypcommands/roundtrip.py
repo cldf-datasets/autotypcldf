@@ -24,7 +24,9 @@ def remove_none(vv):
 
 
 def make_obj(lid, vals, dt, multivalued, vnames, lang):
-    res = {'LID': str(lid), 'Language': lang['Name'], 'Glottocode': lang['Glottocode']}
+    res = {'LID': lid, 'Language': lang['Name']}
+    if lang['Glottocode']:
+        res['Glottocode'] = lang['Glottocode']
     for vid, values in itertools.groupby(vals, lambda v: v['Parameter_ID']):
         values = [v['Value'] for v in values]
         if multivalued[vid]:
@@ -41,8 +43,8 @@ def make_obj(lid, vals, dt, multivalued, vnames, lang):
 
 def normalize_json_obj(obj):
     res = {k: str(v) if k == 'LID' else remove_none(v) for k, v in obj.items() if v is not None}
-    if res.get('Glottocode') == 'NA':
-        res['Glottocode'] = None
+    #if res.get('Glottocode') == 'NA':
+    #    res['Glottocode'] = None
     if set(res.keys()) != {'LID', 'Language', 'Glottocode'}:
         return res
 
@@ -52,6 +54,8 @@ def run(args):
     for jsonpath in sorted(
             walk(ds.raw_dir / 'autotyp-data' / 'data' / 'json', mode='files'),
             key=lambda p: p.stem):
+        if jsonpath.parent.stem == 'Definitions':
+            continue
         if jsonpath.stem == args.dataset or args.dataset is None:
             roundtrip(ds, args, jsonpath)
 
@@ -93,9 +97,12 @@ def roundtrip(ds, args, jsonpath):
                 obj = make_obj(lid, [v], datatypes, multivalued, vnames, langs[lid])
                 lid = obj.pop('LID')
                 lang = obj.pop('Language')
-                gc = obj.pop('Glottocode')
+                gc = obj.pop('Glottocode', None)
                 assert len(obj) == 1 and variables[0]['Name'] in obj
-                objs.append(dict(LID=lid, Language=lang, Glottocode=gc, **obj[variables[0]['Name']][0]))
+                d = dict(LID=lid, Language=lang, **obj[variables[0]['Name']][0])
+                if gc:
+                    d['Glottocode'] = gc
+                objs.append(d)
             if len(jsondata[lid]) == len(objs):
                 if all(o in jsondata[lid] for o in objs):
                     del jsondata[lid]
@@ -118,6 +125,3 @@ def roundtrip(ds, args, jsonpath):
         args.log.info('{}:OK'.format(jsonpath.stem))
     else:
         args.log.warning('{}:FAIL'.format(jsonpath.stem))
-
-{'LID': '10', 'Language': 'Acoma', 'Glottocode': 'west2632', 'Case': [{'HasCase': True, 'IsCaseCodedForDefaultPredicates': True, 'IsCaseCodedForDitransitivePredicates': False, 'IsCaseCodedForOtherPredicates': False}], 'Agreement': [{'HasAgreement': True, 'IsAgreementCodedForDefaultPredicates': True, 'IsAgreementCodedForDitransitivePredicates': False, 'IsAgreementCodedForOtherPredicates': False, 'IsAgreementMarkersCodedForDefaultPredicates': False}]}
-{'LID': '10', 'Glottocode': 'west2632', 'Language': 'Acoma', 'Case': [{'HasCase': True, 'IsCaseCodedForDefaultPredicates': True, 'IsCaseCodedForDitransitivePredicates': False, 'IsCaseCodedForOtherPredicates': False}], 'Agreement': [{'HasAgreement': True, 'IsAgreementCodedForDefaultPredicates': True, 'IsAgreementCodedForDitransitivePredicates': False, 'IsAgreementCodedForOtherPredicates': False, 'IsAgreementMarkersCodedForDefaultPredicates': False}], 'PersonNumberCategories': []}

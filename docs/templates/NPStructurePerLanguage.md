@@ -1,5 +1,7 @@
 # [](ContributionTable?__template__=property.md#cldf:NPStructurePerLanguage)
 
+[](ContributionTable?__template__=property.md&property=Description#cldf:NPStructurePerLanguage)
+
 ## [](ParameterTable#cldf:442)
 
 ![](NPHasAgreement.jpg?parameters=442&pacific-centered&padding-left=10&padding-right=10&padding-top=20&padding-bottom=20&width=12&height=8&markersize=15#cldfviz.map)

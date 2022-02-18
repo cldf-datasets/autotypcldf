@@ -1,5 +1,7 @@
 # [](ContributionTable?__template__=property.md#cldf:VerbInflectionCategoriesAggregatedByMarkerHasPostposedExponent)
 
+[](ContributionTable?__template__=property.md&property=Description#cldf:VerbInflectionCategoriesAggregatedByMarkerHasPostposedExponent)
+
 ## [](ParameterTable#cldf:831)
 
 ![](MarkerHasPostposedExponentForTAM.jpg?parameters=831&pacific-centered&padding-left=10&padding-right=10&padding-top=20&padding-bottom=20&width=12&height=8&markersize=15#cldfviz.map)

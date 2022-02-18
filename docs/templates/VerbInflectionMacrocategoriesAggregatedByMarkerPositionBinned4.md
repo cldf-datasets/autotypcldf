@@ -1,5 +1,7 @@
 # [](ContributionTable?__template__=property.md#cldf:VerbInflectionMacrocategoriesAggregatedByMarkerPositionBinned4)
 
+[](ContributionTable?__template__=property.md&property=Description#cldf:VerbInflectionMacrocategoriesAggregatedByMarkerPositionBinned4)
+
 ## [](ParameterTable#cldf:960)
 
 ![](MarkerPositionBinned4ForTAMPlus.jpg?parameters=960&pacific-centered&padding-left=10&padding-right=10&padding-top=20&padding-bottom=20&width=12&height=8&markersize=15#cldfviz.map)
