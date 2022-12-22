@@ -1,8 +1,7 @@
-import collections
 import re
-import json
 import pathlib
 import itertools
+import collections
 
 from csvw.metadata import Datatype
 import attr
@@ -184,31 +183,6 @@ def iter_cols(md, fmap=None):
             yield csvwspec
 
 
-def fix_bib(s):
-    n = []
-    for line in s.split('\n'):
-        if 'author' in line or ('editor' in line):
-            line = line.replace(' / ', ' and ')
-            line = line.replace(' & ', ' and ')
-            line = line.replace('&', ' and ')
-            line = line.replace('/', ' and ')
-        n.append(line)
-    s = '\n'.join(n)
-    repls = {
-        'Csató, Éva Ágnes, Isaksson, Bo': 'Csató, Éva Ágnes and Isaksson, Bo',
-        'Aikhenvald, A., R.M.W.Dixon,': 'Aikhenvald, A. and R.M.W.Dixon,',
-        'Rivai, F.S., Sorrentino, A.': 'Rivai, F.S. and Sorrentino, A.',
-        'E. Ashton, E. M. K. Ostell, E. G. M. Mulira, Ndawula': 'E. Ashton, E. M. K. and Ostell, E. G. M. and Mulira, Ndawula',
-        'Bickel, Balthasar, Martin Gaenszle, Arjun Rai, Prem D. Rai,  Shree K. Rai, Vishnu S. Rai, Narayan P. Sharma (Gautam)':
-            'Bickel, Balthasar and Martin Gaenszle and Arjun Rai and Prem D. Rai and Shree K. Rai and Vishnu S. Rai and Narayan P. Sharma (Gautam)',
-        'Zigmond, Maurice L. , Munro, Pamela': 'Zigmond, Maurice L. and Munro, Pamela',
-        'Balthasar Bickel, Manoj Rai, Netra P. Paudyal, Goma Banjade, Toya N. Bhatta, Martin Gaenszle, Elena Lieven, Ichchha Purna Rai, Novel Kishore Rai,':
-            'Balthasar Bickel and Manoj Rai and Netra P. Paudyal and Goma Banjade and Toya N. Bhatta and Martin Gaenszle and Elena Lieven and Ichchha Purna Rai and Novel Kishore Rai',
-    }
-    for k, v in repls.items():
-        s = s.replace(k, v)
-    return s
-
 
 class Dataset(BaseDataset):
     dir = pathlib.Path(__file__).parent
@@ -223,9 +197,10 @@ class Dataset(BaseDataset):
 
     def cmd_makecldf(self, args):
         """
-We can meaningfully only split datasets with no multiples per language into individual variables!
-I.e. for the ones listed below, each autotyp "record" must be converted to **one**
-composite JSON value.
+        We can meaningfully only split datasets with just one record per language into individual
+        variables!
+        I.e. for the ones listed below, each autotyp "record" must be converted to **one**
+        composite JSON value.
         """
         unitsets = [
             # Morphology:
@@ -250,11 +225,11 @@ composite JSON value.
         ]
 
         # read the bib!
-        args.writer.cldf.sources.add(fix_bib(self.raw_dir.joinpath(
-            'autotyp-data', 'bibliography', 'autotyp.bib').read_text(encoding='utf8')))
+        args.writer.cldf.sources.add(self.raw_dir.joinpath(
+            'autotyp-data', 'bibliography', 'autotyp.bib').read_text(encoding='utf8'))
         l2src = collections.defaultdict(set)
         for src in args.writer.cldf.sources.items():
-            for lid in src['LanguageID'].split(','):
+            for lid in src.get('languageid', '').split(','):
                 lid = lid.strip()
                 if lid:
                     l2src[lid].add(src.id)
